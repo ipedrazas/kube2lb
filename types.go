@@ -1,6 +1,6 @@
 package main
 
-type NodeList struct {
+type ItemList struct {
 	ApiVersion string `json:"apiVersion"`
 	Kind       string `json:"kind"`
 	Items      []Node

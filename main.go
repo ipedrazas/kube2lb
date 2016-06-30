@@ -31,8 +31,8 @@ func main() {
 	}
 
 	// extract node ip
-	for _, node := range igs.Items {
-		log.Printf("Node %v", node.Metadata.Name)
+	for _, item := range igs.Items {
+		log.Printf("Node %v", item.Metadata.Name)
 	}
 
 	// generate config for haproxy

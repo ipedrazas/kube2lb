@@ -4,16 +4,18 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
 
 const (
 	Ingress = "%s/apis/extensions/v1beta1/ingresses"
+	Nodes   = "%s/api/v1/nodes"
 )
 
-func getIngresses(config Config) (*NodeList, error) {
-	var nodeList NodeList
+func doGet(config Config, path string) (io.ReadCloser, error) {
+
 	client := &http.Client{}
 	if config.Insecure {
 		tr := &http.Transport{
@@ -21,8 +23,6 @@ func getIngresses(config Config) (*NodeList, error) {
 		}
 		client = &http.Client{Transport: tr}
 	}
-
-	path := fmt.Sprintf(Ingress, config.ApiServer)
 
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
@@ -37,8 +37,34 @@ func getIngresses(config Config) (*NodeList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(&nodeList)
+	return resp.Body, nil
+
+}
+
+func getNodes(config Config) (*ItemList, error) {
+	var nodeList ItemList
+	path := fmt.Sprintf(Nodes, config.ApiServer)
+	body, error := doGet(config, path)
+	defer body.Close()
+	if error != nil {
+		return nil, error
+	}
+	err := json.NewDecoder(body).Decode(&nodeList)
+	if err != nil {
+		return nil, err
+	}
+	return &nodeList, nil
+}
+
+func getIngresses(config Config) (*ItemList, error) {
+	var nodeList ItemList
+	path := fmt.Sprintf(Ingress, config.ApiServer)
+	body, error := doGet(config, path)
+	defer body.Close()
+	if error != nil {
+		return nil, error
+	}
+	err := json.NewDecoder(body).Decode(&nodeList)
 	if err != nil {
 		return nil, err
 	}
