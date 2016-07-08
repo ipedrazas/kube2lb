@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	Ingress = "%s/apis/extensions/v1beta1/ingresses"
-	Nodes   = "%s/api/v1/nodes"
+	Ingress      = "%s/apis/extensions/v1beta1/ingresses"
+	Nodes        = "%s/api/v1/nodes"
+	NodePortSvcs = "%s/api/v1/services"
 )
 
 func doGet(config Config, path string) (io.ReadCloser, error) {
@@ -54,6 +55,45 @@ func getNodes(config Config) (*ItemList, error) {
 		return nil, err
 	}
 	return &nodeList, nil
+}
+
+func getUnschedulable(config Config) (*ItemList, error) {
+	var unscheduled []Node
+	nodes, err := getNodes(config)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range nodes.Items {
+		if !item.Spec.Unschedulable {
+			unscheduled = append(unscheduled, item)
+		}
+	}
+	nodes.Items = unscheduled
+	return nodes, nil
+}
+
+func getPorts(config Config) ([]int, error) {
+	var nodeList ItemList
+	var exposedPorts []int
+	path := fmt.Sprintf(NodePortSvcs, config.ApiServer)
+	body, error := doGet(config, path)
+	defer body.Close()
+	if error != nil {
+		return nil, error
+	}
+	err := json.NewDecoder(body).Decode(&nodeList)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range nodeList.Items {
+		if item.Spec.Type == "NodePort" {
+			for _, e := range item.Spec.Ports {
+				exposedPorts = append(exposedPorts, e.NodePort)
+			}
+		}
+	}
+
+	return exposedPorts, nil
 }
 
 func getIngresses(config Config) (*ItemList, error) {

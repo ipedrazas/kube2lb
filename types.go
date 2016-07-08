@@ -8,6 +8,20 @@ type ItemList struct {
 
 type Node struct {
 	Metadata Metadata `json:"metadata"`
+	Spec     Spec     `json:"spec"`
+}
+
+type Spec struct {
+	Type          string `json:"type"`
+	Ports         []Port `json:"ports"`
+	Unschedulable bool   `json:"unschedulable"`
+}
+
+type Port struct {
+	Protocol   string `json:"protocol"`
+	Port       int    `json:"port"`
+	TargetPort int    `json:"targetPort"`
+	NodePort   int    `json:"nodePort"`
 }
 
 type Metadata struct {

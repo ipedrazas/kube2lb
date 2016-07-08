@@ -24,15 +24,21 @@ func main() {
 		log.Printf("Accessing %v using %v\n", apiserver, token)
 	}
 
-	// get ingress controllers
-	igs, error := getIngresses(config)
+	nodes, err := getUnschedulable(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ports, error := getPorts(config)
 	if error != nil {
 		log.Fatal(error)
 	}
 
 	// extract node ip
-	for _, item := range igs.Items {
-		log.Printf("Node %v", item.Metadata.Name)
+	for _, item := range nodes.Items {
+		for _, elem := range ports {
+			log.Printf("Node %v:%v", item.Metadata.Name, elem)
+		}
 	}
 
 	// generate config for haproxy
