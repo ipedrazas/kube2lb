@@ -15,6 +15,14 @@ func main() {
 	token := os.Getenv("TOKEN")
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 
+	if apiserver == "" {
+		log.Fatal("API Server not defined")
+	}
+
+	if token == "" {
+		log.Fatal("Token not defined")
+	}
+
 	config := Config{
 		ApiServer:   apiserver,
 		BearerToken: token,
@@ -24,22 +32,27 @@ func main() {
 		log.Printf("Accessing %v using %v\n", apiserver, token)
 	}
 
-	nodes, err := getUnschedulable(config)
+	nodes, err := getPods(config)
+	// nodes, err := getUnschedulable(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ports, error := getPorts(config)
-	if error != nil {
-		log.Fatal(error)
+	for _, item := range nodes.Items {
+		log.Printf("Node %v at %v with IP: %v", item.Metadata.Name, item.Status.HostIP, item.Status.PodIP)
 	}
 
-	// extract node ip
-	for _, item := range nodes.Items {
-		for _, elem := range ports {
-			log.Printf("Node %v:%v", item.Metadata.Name, elem)
-		}
-	}
+	// ports, error := getPorts(config)
+	// if error != nil {
+	// 	log.Fatal(error)
+	// }
+
+	// // extract node ip
+	// for _, item := range nodes.Items {
+	// 	for _, elem := range ports {
+	// 		log.Printf("Node %v:%v", item.Metadata.Name, elem)
+	// 	}
+	// }
 
 	// generate config for haproxy
 

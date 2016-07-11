@@ -9,12 +9,19 @@ type ItemList struct {
 type Node struct {
 	Metadata Metadata `json:"metadata"`
 	Spec     Spec     `json:"spec"`
+	Status   Status   `json:"status"`
 }
 
 type Spec struct {
 	Type          string `json:"type"`
 	Ports         []Port `json:"ports"`
 	Unschedulable bool   `json:"unschedulable"`
+}
+
+type Status struct {
+	Phase  string `json:"phase"`
+	HostIP string `json:"hostIP"`
+	PodIP  string `json:"podIP"`
 }
 
 type Port struct {

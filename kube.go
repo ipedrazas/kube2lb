@@ -13,6 +13,7 @@ const (
 	Ingress      = "%s/apis/extensions/v1beta1/ingresses"
 	Nodes        = "%s/api/v1/nodes"
 	NodePortSvcs = "%s/api/v1/services"
+	Pods         = "%s/api/v1/pods"
 )
 
 func doGet(config Config, path string) (io.ReadCloser, error) {
@@ -42,9 +43,8 @@ func doGet(config Config, path string) (io.ReadCloser, error) {
 
 }
 
-func getNodes(config Config) (*ItemList, error) {
+func getItems(config Config, path string) (*ItemList, error) {
 	var nodeList ItemList
-	path := fmt.Sprintf(Nodes, config.ApiServer)
 	body, error := doGet(config, path)
 	defer body.Close()
 	if error != nil {
@@ -55,6 +55,25 @@ func getNodes(config Config) (*ItemList, error) {
 		return nil, err
 	}
 	return &nodeList, nil
+}
+
+func getNodes(config Config) (*ItemList, error) {
+
+	path := fmt.Sprintf(Nodes, config.ApiServer)
+	nodeList, err := getItems(config, path)
+	if err != nil {
+		return nil, err
+	}
+	return nodeList, nil
+}
+
+func getPods(config Config) (*ItemList, error) {
+	path := fmt.Sprintf(Pods, config.ApiServer)
+	nodeList, err := getItems(config, path)
+	if err != nil {
+		return nil, err
+	}
+	return nodeList, nil
 }
 
 func getUnschedulable(config Config) (*ItemList, error) {
@@ -92,21 +111,14 @@ func getPorts(config Config) ([]int, error) {
 			}
 		}
 	}
-
 	return exposedPorts, nil
 }
 
 func getIngresses(config Config) (*ItemList, error) {
-	var nodeList ItemList
 	path := fmt.Sprintf(Ingress, config.ApiServer)
-	body, error := doGet(config, path)
-	defer body.Close()
-	if error != nil {
-		return nil, error
-	}
-	err := json.NewDecoder(body).Decode(&nodeList)
+	nodeList, err := getItems(config, path)
 	if err != nil {
 		return nil, err
 	}
-	return &nodeList, nil
+	return nodeList, nil
 }

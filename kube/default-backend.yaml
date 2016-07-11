@@ -3,7 +3,7 @@ kind: ReplicationController
 metadata:
   name: default-http-backend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     app: default-http-backend
   template:
@@ -34,4 +34,4 @@ spec:
           requests:
             cpu: 10m
             memory: 20Mi
-887bgew
+
