@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func write(endpoints []string, key string, value string) (bool, error) {
+func writeToETCD(endpoints []string, key string, value string) (bool, error) {
 
 	cfg := client.Config{
 		Endpoints: endpoints,

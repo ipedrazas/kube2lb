@@ -14,6 +14,8 @@ func main() {
 	apiserver := os.Getenv("API_SERVER")
 	token := os.Getenv("TOKEN")
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
+	domain := os.Getenv("DOMAIN")
+	etcd := os.Getenv("ETCD_ENDPOINTS")
 
 	if apiserver == "" {
 		log.Fatal("API Server not defined")
@@ -40,6 +42,10 @@ func main() {
 
 	for _, item := range nodes.Items {
 		log.Printf("Node %v at %v with IP: %v", item.Metadata.Name, item.Status.HostIP, item.Status.PodIP)
+		key := domain + "/" + item.Metadata.Name
+
+		endpoints := []string{etcd}
+		writeToETCD(endpoints, key, item.Status.PodIP)
 	}
 
 	// ports, error := getPorts(config)
