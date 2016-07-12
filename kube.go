@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	Ingress      = "%s/apis/extensions/v1beta1/ingresses"
-	Nodes        = "%s/api/v1/nodes"
-	NodePortSvcs = "%s/api/v1/services"
-	Pods         = "%s/api/v1/pods"
+	Ingress   = "%s/apis/extensions/v1beta1/ingresses"
+	Nodes     = "%s/api/v1/nodes"
+	Services  = "%s/api/v1/services"
+	Pods      = "%s/api/v1/pods"
+	EndPoints = "%s/api/v1/endpoints"
 )
 
 func doGet(config Config, path string) (io.ReadCloser, error) {
@@ -57,6 +58,16 @@ func getItems(config Config, path string) (*ItemList, error) {
 	return &nodeList, nil
 }
 
+func getEndPoints(config Config) (*ItemList, error) {
+
+	path := fmt.Sprintf(EndPoints, config.ApiServer)
+	nodeList, err := getItems(config, path)
+	if err != nil {
+		return nil, err
+	}
+	return nodeList, nil
+}
+
 func getNodes(config Config) (*ItemList, error) {
 
 	path := fmt.Sprintf(Nodes, config.ApiServer)
@@ -94,7 +105,7 @@ func getUnschedulable(config Config) (*ItemList, error) {
 func getPorts(config Config) ([]int, error) {
 	var nodeList ItemList
 	var exposedPorts []int
-	path := fmt.Sprintf(NodePortSvcs, config.ApiServer)
+	path := fmt.Sprintf(Services, config.ApiServer)
 	body, error := doGet(config, path)
 	defer body.Close()
 	if error != nil {
