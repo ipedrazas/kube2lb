@@ -49,10 +49,21 @@ func main() {
 
 	endpoints := []string{etcd}
 	for _, node := range nodes {
-		for _, port := range ports {
+		for _, iport := range ports {
+			port := strconv.Itoa(iport)
 			key := fmt.Sprintf("%v/%v", base, node)
-			writeToETCD(endpoints, key, strconv.Itoa(port))
+			writeToETCD(endpoints, key, port)
 		}
+	}
+
+	for i := 0; i < len(nodes); i++ {
+		key := fmt.Sprintf("%v/node%v", base, i)
+		writeToETCD(endpoints, key, nodes[i])
+	}
+
+	for i := 0; i < len(ports); i++ {
+		key := fmt.Sprintf("%v/port%v", base, i)
+		writeToETCD(endpoints, key, ports[i])
 	}
 
 	// Case Direct Access to Pods
