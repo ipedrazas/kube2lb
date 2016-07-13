@@ -63,7 +63,8 @@ func main() {
 
 	for i := 0; i < len(ports); i++ {
 		key := fmt.Sprintf("%v/port%v", base, i)
-		writeToETCD(endpoints, key, ports[i])
+		port := strconv.Itoa(ports[i])
+		writeToETCD(endpoints, key, port)
 	}
 
 	// Case Direct Access to Pods
