@@ -68,14 +68,17 @@ func getEndPoints(config Config) (*ItemList, error) {
 	return nodeList, nil
 }
 
-func getNodes(config Config) (*ItemList, error) {
-
+func getNodes(config Config) ([]string, error) {
+	var nodes []string
 	path := fmt.Sprintf(Nodes, config.ApiServer)
 	nodeList, err := getItems(config, path)
 	if err != nil {
 		return nil, err
 	}
-	return nodeList, nil
+	for _, item := range nodeList.Items {
+		nodes = append(nodes, item.Metadata.Name)
+	}
+	return nodes, nil
 }
 
 func getPods(config Config) (*ItemList, error) {
@@ -87,20 +90,20 @@ func getPods(config Config) (*ItemList, error) {
 	return nodeList, nil
 }
 
-func getUnschedulable(config Config) (*ItemList, error) {
-	var unscheduled []Node
-	nodes, err := getNodes(config)
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range nodes.Items {
-		if !item.Spec.Unschedulable {
-			unscheduled = append(unscheduled, item)
-		}
-	}
-	nodes.Items = unscheduled
-	return nodes, nil
-}
+// func getUnschedulable(config Config) (*ItemList, error) {
+// 	var unscheduled []Node
+// 	nodes, err := getNodes(config)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	for _, item := range nodes.Items {
+// 		if !item.Spec.Unschedulable {
+// 			unscheduled = append(unscheduled, item)
+// 		}
+// 	}
+// 	nodes.Items = unscheduled
+// 	return nodes, nil
+// }
 
 func getPorts(config Config) ([]int, error) {
 	var nodeList ItemList

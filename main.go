@@ -14,7 +14,7 @@ func main() {
 	apiserver := os.Getenv("API_SERVER")
 	token := os.Getenv("TOKEN")
 	debug, _ := strconv.ParseBool(os.Getenv("DEBUG"))
-	domain := os.Getenv("DOMAIN")
+	base := os.Getenv("BASE")
 	etcd := os.Getenv("ETCD_ENDPOINTS")
 
 	if apiserver == "" {
@@ -34,34 +34,28 @@ func main() {
 		log.Printf("Accessing %v using %v\n", apiserver, token)
 	}
 
-	nodes, err := getPods(config)
-	// nodes, err := getUnschedulable(config)
+	// Case NodePorts
+	// get nodes
+	nodes, err := getNodes(config)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	// get nodeports
+	ports, err := getPorts(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, item := range nodes.Items {
-		log.Printf("Node %v at %v with IP: %v", item.Metadata.Name, item.Status.HostIP, item.Status.PodIP)
-		key := domain + "/" + item.Metadata.Name
-
-		endpoints := []string{etcd}
-		writeToETCD(endpoints, key, item.Status.PodIP)
+	endpoints := []string{etcd}
+	for _, node := range nodes {
+		for _, port := range ports {
+			key := fmt.Sprintf("%v/%v", base, node)
+			writeToETCD(endpoints, key, strconv.Itoa(port))
+		}
 	}
 
-	// ports, error := getPorts(config)
-	// if error != nil {
-	// 	log.Fatal(error)
-	// }
-
-	// // extract node ip
-	// for _, item := range nodes.Items {
-	// 	for _, elem := range ports {
-	// 		log.Printf("Node %v:%v", item.Metadata.Name, elem)
-	// 	}
-	// }
-
-	// generate config for haproxy
-
-	// update haproxy
+	// Case Direct Access to Pods
+	// get endpoints by service
 
 }
